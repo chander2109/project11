@@ -13,18 +13,6 @@ provider "aws" {
   region = "us-west-2"
 }
 
-# Latest Amazon Linux 2023 AMI
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-
-  owners = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-}
-
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -81,13 +69,13 @@ resource "aws_route_table" "public_rt" {
   }
 }
 
-# Route Table Association
-resource "aws_route_table_association" "subnet1" {
+# Route Table Associations
+resource "aws_route_table_association" "subnet1_assoc" {
   subnet_id      = aws_subnet.subnet1.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_route_table_association" "subnet2" {
+resource "aws_route_table_association" "subnet2_assoc" {
   subnet_id      = aws_subnet.subnet2.id
   route_table_id = aws_route_table.public_rt.id
 }
@@ -112,15 +100,19 @@ resource "aws_security_group" "ec2_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "31may-sg"
+  }
 }
 
 # EC2 Instance
 resource "aws_instance" "vm31may" {
-  ami                    = ami-0d13e2317a7e75c95
-  instance_type          = "t3.micro"
-  subnet_id              = aws_subnet.subnet1.id
-  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-
+  ami                         = "ami-06c6960215cdac78d"
+  instance_type               = "t3.micro"
+  key_name                    = "YOUR_KEYPAIR_NAME"
+  subnet_id                   = aws_subnet.subnet1.id
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
   associate_public_ip_address = true
 
   tags = {
@@ -128,6 +120,7 @@ resource "aws_instance" "vm31may" {
   }
 }
 
+# Outputs
 output "vpc_id" {
   value = aws_vpc.main.id
 }
@@ -140,6 +133,10 @@ output "subnet2_id" {
   value = aws_subnet.subnet2.id
 }
 
-output "ec2_public_ip" {
+output "instance_id" {
+  value = aws_instance.vm31may.id
+}
+
+output "public_ip" {
   value = aws_instance.vm31may.public_ip
 }
