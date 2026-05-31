@@ -110,7 +110,7 @@ resource "aws_security_group" "ec2_sg" {
 resource "aws_instance" "vm31may" {
   ami                         = "ami-06c6960215cdac78d"
   instance_type               = "t3.micro"
-  key_name                    = "vm31may.pem"
+  key_name                    = "key"
   subnet_id                   = aws_subnet.subnet1.id
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
   associate_public_ip_address = true
